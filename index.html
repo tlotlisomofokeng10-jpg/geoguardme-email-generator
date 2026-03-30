@@ -164,9 +164,9 @@
                     Live Brand Preview
                 </div>
                 <div class="h-full overflow-y-auto preview-container py-8">
-                    <div id="previewFrame" class="shadow-2xl">
-                        <!-- Email HTML will be injected here -->
-                    </div>
+                    <iframe id="previewFrame" class="shadow-2xl" frameborder="0" scrolling="no"
+                        style="width: 100%; border: none; display: block; min-height: 600px;"
+                        title="Email Preview"></iframe>
                 </div>
             </div>
         </div>
@@ -327,7 +327,15 @@
         }
 
         function updatePreview() {
-            previewEl.innerHTML = generateEmailHtml(editorEl.innerHTML);
+            const html = generateEmailHtml(editorEl.innerHTML);
+            previewEl.srcdoc = html;
+            // Auto-resize iframe to content height after it loads
+            previewEl.onload = () => {
+                try {
+                    const body = previewEl.contentDocument.body;
+                    previewEl.style.height = (body.scrollHeight + 20) + 'px';
+                } catch(e) {}
+            };
         }
 
         async function copyToClipboard() {
