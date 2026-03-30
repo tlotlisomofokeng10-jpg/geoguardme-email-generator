@@ -313,20 +313,59 @@ ${styleBlock}
 
         async function copyToClipboard() {
             const html = generateEmailHtml(editorEl.innerHTML, true);
+            const plainText = editorEl.innerText || "GeoGuardMe Email Notification";
+            
+            let isClipboardSupported = false;
+
             try {
-                const blob = new Blob([html], { type: 'text/html' });
-                await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
-                toastEl.classList.remove('opacity-0', 'translate-y-4');
-                toastEl.classList.add('opacity-100', 'translate-y-0');
-                setTimeout(() => { toastEl.classList.add('opacity-0', 'translate-y-4'); toastEl.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
+                if (navigator.clipboard && window.ClipboardItem) {
+                    const htmlBlob = new Blob([html], { type: 'text/html' });
+                    const textBlob = new Blob([plainText], { type: 'text/plain' });
+                    await navigator.clipboard.write([
+                        new ClipboardItem({
+                            'text/html': htmlBlob,
+                            'text/plain': textBlob
+                        })
+                    ]);
+                    isClipboardSupported = true;
+                }
             } catch (err) {
-                const tempDiv = document.createElement('div'); tempDiv.style.position = 'fixed'; tempDiv.style.left = '-9999px'; tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
-                const range = document.createRange(); range.selectNode(tempDiv);
-                window.getSelection().removeAllRanges(); window.getSelection().addRange(range);
-                document.execCommand('copy'); document.body.removeChild(tempDiv);
-                toastEl.classList.remove('opacity-0'); setTimeout(() => toastEl.classList.add('opacity-0'), 3000);
+                console.warn('Modern Clipboard API failed, attempting fallback', err);
             }
+
+            if (!isClipboardSupported) {
+                const listener = function(ev) {
+                    ev.preventDefault();
+                    ev.clipboardData.setData('text/html', html);
+                    ev.clipboardData.setData('text/plain', plainText);
+                };
+                document.addEventListener('copy', listener);
+                
+                const dummy = document.createElement('span');
+                dummy.textContent = 'copy';
+                dummy.style.position = 'fixed';
+                dummy.style.opacity = '0';
+                document.body.appendChild(dummy);
+                
+                const range = document.createRange();
+                range.selectNodeContents(dummy);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                
+                document.execCommand('copy');
+                
+                sel.removeAllRanges();
+                document.body.removeChild(dummy);
+                document.removeEventListener('copy', listener);
+            }
+
+            toastEl.classList.remove('opacity-0', 'translate-y-4');
+            toastEl.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => { 
+                toastEl.classList.add('opacity-0', 'translate-y-4'); 
+                toastEl.classList.remove('opacity-100', 'translate-y-0'); 
+            }, 3000);
         }
 
         editorEl.addEventListener('input', () => { updatePreview(); updateToolbarState(); });
