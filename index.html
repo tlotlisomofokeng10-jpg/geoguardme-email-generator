@@ -248,7 +248,7 @@
             updatePreview();
         }
 
-        function generateEmailHtml(innerHtml) {
+        function generateEmailHtml(innerHtml, forPreview = false) {
             // Replace tags with email-safe inline styles
             let styledContent = innerHtml
                 .replace(/<h2>/g, `<h2 style="font-size: 22px; color: ${BRAND.primaryColor}; margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-family: sans-serif;">`)
@@ -265,6 +265,9 @@
     <meta name="color-scheme" content="light">
     <meta name="supported-color-schemes" content="light">
     <style>
+        /* Preview always forces light mode so the correct logo is shown regardless of OS theme.
+           When copied for real email clients, dark mode swap is fully active. */
+        ${forPreview ? ':root { color-scheme: light !important; }' : ''}
         /* Light mode logo shown by default, dark mode logo hidden */
         .logo-light { display: block !important; max-width: 240px; height: auto; margin: 0 auto; border: 0; }
         .logo-dark  { display: none  !important; max-width: 240px; height: auto; margin: 0 auto; border: 0; }
@@ -327,7 +330,7 @@
         }
 
         function updatePreview() {
-            const html = generateEmailHtml(editorEl.innerHTML);
+            const html = generateEmailHtml(editorEl.innerHTML, true); // force light mode in preview
             previewEl.srcdoc = html;
             // Auto-resize iframe to content height after it loads
             previewEl.onload = () => {
