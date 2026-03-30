@@ -139,9 +139,9 @@
                         Dark Mode</button>
                 </div>
                 <div id="previewContainer"
-                    class="flex-grow h-full overflow-y-auto preview-container py-8 text-center mt-8">
+                    class="flex-grow h-full overflow-auto preview-container py-8 text-center mt-8">
                     <iframe id="previewFrame" class="mx-auto" frameborder="0" scrolling="no"
-                        style="width: 100%; border: none; min-height: 650px;"></iframe>
+                        style="width: 100%; min-width: 600px; border: none; min-height: 650px;"></iframe>
                 </div>
             </div>
         </div>
@@ -260,8 +260,8 @@ ${styleBlock}
 <body class="body-bg" style="margin: 0; padding: 0; background-color: ${bgColor}; font-family: 'Segoe UI', Arial, sans-serif;">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
-            <td style="padding: 20px 0;" align="center">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="card" style="background-color: ${cardColor}; border-radius: 12px; overflow: hidden; border: 1px solid ${borderColor}; margin: 0 auto; table-layout: fixed;">
+            <td style="padding: 20px;" align="center">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="card" style="max-width: 600px; background-color: ${cardColor}; border-radius: 12px; overflow: hidden; border: 1px solid ${borderColor}; margin: 0 auto;">
                     <!-- Branded Header -->
                     <tr>
                         <td style="background-color: ${BRAND.primaryColor}; background-image: linear-gradient(${BRAND.primaryColor}, ${BRAND.primaryColor}); padding: 40px 20px; text-align: center;">
