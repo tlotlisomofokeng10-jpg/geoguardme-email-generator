@@ -267,9 +267,9 @@ ${styleBlock}
                         <td style="background-color: ${BRAND.primaryColor}; background-image: linear-gradient(${BRAND.primaryColor}, ${BRAND.primaryColor}); padding: 40px 20px; text-align: center;">
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                                 <tr>
-                                    <!-- The Shield Container - Using the White Pixel trick so Android Gmail can't invert it -->
-                                    <td class="logo-shield" style="background-color: #ffffff; background-image: url('${whitePixel}'); background-repeat: repeat; border-radius: 16px; padding: 20px 28px; border: 2px solid ${BRAND.accentColor};" bgcolor="#ffffff" align="center">
-                                        <img src="${BRAND.logo}" alt="${BRAND.name}" width="220" style="display: block; border: 0; max-width: 220px; height: auto; margin: 0 auto; filter: none !important;">
+                                    <!-- The Shield Container - using 0 padding to prevent dark mode inversion from showing black background -->
+                                    <td class="logo-shield" style="background-color: #ffffff; border-radius: 12px; padding: 0; border: 2px solid ${BRAND.accentColor}; overflow: hidden;" bgcolor="#ffffff" align="center">
+                                        <img src="${BRAND.logo}" alt="${BRAND.name}" width="220" style="display: block; border: 0; max-width: 220px; height: auto; margin: 0 auto; border-radius: 10px; filter: none !important;">
                                     </td>
                                 </tr>
                             </table>
