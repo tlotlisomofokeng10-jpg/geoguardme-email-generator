@@ -166,7 +166,7 @@
 
         const BRAND = {
             name: "GeoGuardMe",
-            logo: "https://storage.googleapis.com/travelhawk-email-screenshots/GeoGuardMe/1_trim.png",
+            logo: "https://storage.googleapis.com/travelhawk-email-screenshots/GeoGuardMe/Untitled%20design%20(17).png",
             primaryColor: "#0c4a6e",
             accentColor: "#0ea5e9",
             website: "app.geoguardme.com",
@@ -222,6 +222,9 @@
             // Changed footerBg in light mode to a subtle light grey
             const footerBg = isDarkView ? '#0f172a' : '#f8fafc';
 
+            // A 1x1 base64 encoded white pixel to force Gmail Android to keep the background white
+            const whitePixel = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+
             let styledContent = innerHtml
                 .replace(/<h2/gi, `<h2 style="font-size: 20px; color: ${h2Color}; margin-bottom: 12px; margin-top: 24px; font-weight: bold; font-family: sans-serif;"`)
                 .replace(/<p/gi, `<p style="font-size: 16px; margin-bottom: 16px; color: ${textColor}; line-height: 1.6; font-family: sans-serif;"`);
@@ -234,10 +237,11 @@
             .content-text, .content-text p, .content-text h2, .content-text div, .content-text span { color: #f1f5f9 !important; background-color: #1e293b !important; }
             .content-text h2 { color: ${BRAND.accentColor} !important; }
             .footer-cell { background-color: #0f172a !important; }
-            /* Samsung Gmail fix: Linear gradient trick to keep background white */
+            /* Gmail Hack: Use the white pixel image to stop the container from turning black */
             .logo-shield { 
                 background-color: #ffffff !important; 
-                background-image: linear-gradient(#ffffff, #ffffff) !important; 
+                background-image: url('${whitePixel}') !important; 
+                background-repeat: repeat !important;
                 filter: none !important;
                 -webkit-filter: none !important;
             }
@@ -264,11 +268,11 @@ ${styleBlock}
                             <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                                 <tr>
                                     <!-- Decorated Container Ring -->
-                                    <td style="background-color: rgba(255, 255, 255, 0.1); padding: 6px; border-radius: 12px;">
+                                    <td style="background-color: rgba(255, 255, 255, 0.1); padding: 6px; border-radius: 16px;">
                                         <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                                             <tr>
-                                                <!-- The Shield Container - Padding minimized to prevent Android Gmail black-box bug -->
-                                                <td class="logo-shield" style="background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); border-radius: 8px; padding: 4px; color-scheme: light only; line-height: 0; border: 2px solid ${BRAND.accentColor};" bgcolor="#ffffff">
+                                                <!-- The Shield Container - Using the White Pixel trick so Android Gmail can't invert it -->
+                                                <td class="logo-shield" style="background-color: #ffffff; background-image: url('${whitePixel}'); background-repeat: repeat; border-radius: 10px; padding: 14px 24px; color-scheme: light only; line-height: 0; border: 2px solid ${BRAND.accentColor};" bgcolor="#ffffff">
                                                     <img src="${BRAND.logo}" alt="${BRAND.name}" width="220" style="display: block; border: 0; max-width: 220px; height: auto; margin: 0 auto; filter: none !important;">
                                                 </td>
                                             </tr>
