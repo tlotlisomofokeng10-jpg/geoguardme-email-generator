@@ -11,7 +11,7 @@
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
         }
 
         .preview-container {
@@ -80,7 +80,7 @@
                     </span>
                     GeoGuardMe Generator
                 </h1>
-                <p class="text-slate-500 mt-1">Design and copy branded GeoGuardMe communications.</p>
+                <p class="text-slate-500 mt-1">Branded Email Template Builder</p>
             </div>
             <div class="flex gap-3">
                 <button id="copyBtn" onclick="copyToClipboard()"
@@ -96,6 +96,7 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left: Editor -->
             <div class="space-y-6">
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                     <div class="bg-slate-50 border-b border-slate-200 p-2 flex items-center gap-1">
@@ -127,14 +128,15 @@
                 </div>
             </div>
 
+            <!-- Right: Preview Area -->
             <div class="bg-slate-300/50 rounded-2xl p-4 border border-slate-300 relative min-h-[700px] flex flex-col">
                 <div class="absolute top-4 left-4 z-10 flex gap-2">
                     <div
                         class="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-sky-900 uppercase tracking-widest shadow-sm border border-sky-100">
                         Live Preview</div>
                     <button id="darkModeToggle" onclick="toggleDarkMode()"
-                        class="bg-slate-800 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm hover:bg-slate-700 transition-all">View
-                        in Dark Mode</button>
+                        class="bg-slate-800 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm hover:bg-slate-700 transition-all">Test
+                        Dark Mode</button>
                 </div>
                 <div id="previewContainer"
                     class="flex-grow h-full overflow-y-auto preview-container py-8 text-center mt-8">
@@ -164,10 +166,9 @@
 
         const BRAND = {
             name: "GeoGuardMe",
-            logo: "https://storage.googleapis.com/travelhawk-email-screenshots/GeoGuardMe/Untitled%20design%20(16).png",
+            logo: "https://storage.googleapis.com/travelhawk-email-screenshots/GeoGuardMe/1_trim.png",
             primaryColor: "#0c4a6e",
             accentColor: "#0ea5e9",
-            footerBg: "#f8fafc",
             website: "app.geoguardme.com",
             tagline: "Your Trusted Safety Companion"
         };
@@ -177,7 +178,7 @@
 
         function toggleDarkMode() {
             const isDark = previewContainer.classList.toggle('preview-dark-mode');
-            darkModeToggle.textContent = isDark ? "View in Light Mode" : "View in Dark Mode";
+            darkModeToggle.textContent = isDark ? "Switch to Light Mode" : "Test Dark Mode";
             updatePreview();
         }
 
@@ -207,19 +208,40 @@
         }
 
         function generateEmailHtml(innerHtml, isFinalCopy = false) {
-            const isDarkView = previewContainer.classList.contains('preview-dark-mode');
+            // ALWAYS force Light Mode base colors for the copied email.
+            // Dark mode in the final email is handled strictly by the @media CSS block.
+            const isDarkView = isFinalCopy ? false : previewContainer.classList.contains('preview-dark-mode');
 
-            // Light Mode is Pure White
-            // Dark Mode is Slate
-            const bgColor = isDarkView ? '#0f172a' : '#ffffff';
+            // Strictly white for light mode card, Slate for dark mode card
+            const bgColor = isDarkView ? '#0f172a' : '#f8fafc';
             const cardColor = isDarkView ? '#1e293b' : '#ffffff';
-            const textColor = isDarkView ? '#f8fafc' : '#334155';
+            const textColor = isDarkView ? '#f1f5f9' : '#334155';
             const borderColor = isDarkView ? '#334155' : '#e2e8f0';
             const h2Color = isDarkView ? BRAND.accentColor : BRAND.primaryColor;
 
+            // Changed footerBg in light mode to a subtle light grey
+            const footerBg = isDarkView ? '#0f172a' : '#f8fafc';
+
             let styledContent = innerHtml
-                .replace(/<h2/gi, `<h2 style="font-size: 22px; color: ${h2Color} !important; margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-family: sans-serif;"`)
-                .replace(/<p/gi, `<p style="font-size: 16px; margin-bottom: 20px; color: ${textColor} !important; line-height: 1.7; font-family: sans-serif;"`);
+                .replace(/<h2/gi, `<h2 style="font-size: 20px; color: ${h2Color}; margin-bottom: 12px; margin-top: 24px; font-weight: bold; font-family: sans-serif;"`)
+                .replace(/<p/gi, `<p style="font-size: 16px; margin-bottom: 16px; color: ${textColor}; line-height: 1.6; font-family: sans-serif;"`);
+
+            const styleBlock = isFinalCopy ? `
+        /* Modern Dark Mode Protection */
+        @media (prefers-color-scheme: dark) {
+            .body-bg { background-color: #0f172a !important; }
+            .card { background-color: #1e293b !important; border-color: #334155 !important; }
+            .content-text, .content-text p, .content-text h2, .content-text div, .content-text span { color: #f1f5f9 !important; background-color: #1e293b !important; }
+            .content-text h2 { color: ${BRAND.accentColor} !important; }
+            .footer-cell { background-color: #0f172a !important; }
+            /* Samsung Gmail fix: Linear gradient trick to keep background white */
+            .logo-shield { 
+                background-color: #ffffff !important; 
+                background-image: linear-gradient(#ffffff, #ffffff) !important; 
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+        }` : '';
 
             return `
 <!DOCTYPE html>
@@ -228,47 +250,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* This media query only runs in the final sent email, not the preview */
-        ${isFinalCopy ? `
-        @media (prefers-color-scheme: dark) {
-            .body-bg { background-color: #0f172a !important; }
-            .card { background-color: #1e293b !important; border-color: #334155 !important; }
-            .content-text, .content-text p, .content-text div, .content-text span { color: #f8fafc !important; }
-            /* THE SAMSUNG PROTECTION */
-            .logo-protect { 
-                background-color: #fffffe !important; 
-                background-image: linear-gradient(#fffffe, #fffffe) !important; 
-                filter: none !important; 
-                -webkit-filter: none !important;
-            }
-        }
-        ` : ''}
+${styleBlock}
     </style>
 </head>
 <body class="body-bg" style="margin: 0; padding: 0; background-color: ${bgColor}; font-family: 'Segoe UI', Arial, sans-serif;">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
-            <td style="padding: 30px 0;" align="center">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="card" style="background-color: ${cardColor}; border-radius: 16px; overflow: hidden; border: 1px solid ${borderColor}; margin: 0 auto;">
+            <td style="padding: 20px 0;" align="center">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="card" style="background-color: ${cardColor}; border-radius: 12px; overflow: hidden; border: 1px solid ${borderColor}; margin: 0 auto; table-layout: fixed;">
+                    <!-- Branded Header -->
                     <tr>
-                        <td style="background-color: ${BRAND.primaryColor}; padding: 45px 30px; text-align: center;">
-                            <!-- White Pill Container with Samsung-Safe Off-White #fffffe -->
-                            <div class="logo-protect" style="background-color: #fffffe; background-image: linear-gradient(#fffffe, #fffffe); border-radius: 20px; padding: 18px 25px; display: inline-block; border: 3px solid ${BRAND.accentColor};">
-                                <img src="${BRAND.logo}" alt="${BRAND.name}" width="280" style="display: block; border: 0; max-width: 280px; height: auto; margin: 0 auto;">
-                            </div>
-                            <p style="margin: 25px 0 0 0; color: #ffffff !important; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-family: 'Segoe UI', Arial, sans-serif;">${BRAND.tagline}</p>
+                        <td style="background-color: ${BRAND.primaryColor}; padding: 40px 20px; text-align: center;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                <tr>
+                                    <!-- Decorated Container Ring -->
+                                    <td style="background-color: rgba(255, 255, 255, 0.1); padding: 6px; border-radius: 12px;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                                            <tr>
+                                                <!-- The Shield Container - Padding minimized to prevent Android Gmail black-box bug -->
+                                                <td class="logo-shield" style="background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); border-radius: 8px; padding: 4px; color-scheme: light only; line-height: 0; border: 2px solid ${BRAND.accentColor};" bgcolor="#ffffff">
+                                                    <img src="${BRAND.logo}" alt="${BRAND.name}" width="220" style="display: block; border: 0; max-width: 220px; height: auto; margin: 0 auto; filter: none !important;">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin: 24px 0 0 0; color: #ffffff !important; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; font-family: sans-serif;">${BRAND.tagline}</p>
                         </td>
                     </tr>
+                    <!-- Message Body (Locked to White in Light Mode) -->
                     <tr>
-                        <td class="content-text" style="padding: 40px; font-family: 'Segoe UI', Arial, sans-serif; color: ${textColor} !important; text-align: left;">
-                            <div style="color: ${textColor} !important;">
+                        <td class="content-text" style="padding: 40px; font-family: sans-serif; color: ${textColor}; text-align: left; background-color: ${cardColor};">
+                            <div style="color: ${textColor}; font-size: 16px; background-color: ${cardColor};">
                                 ${styledContent}
                             </div>
                         </td>
                     </tr>
+                    <!-- Footer (White for Light Mode, Deep Slate for Dark) -->
                     <tr>
-                        <td style="background-color: ${isDarkView ? '#0f172a' : BRAND.footerBg}; padding: 30px; text-align: center; border-top: 1px solid ${borderColor}; font-size: 12px; color: #94a3b8; font-family: 'Segoe UI', Arial, sans-serif;">
-                            <p style="margin: 0 0 10px 0; font-weight: 600; color: #64748b;">&copy; 2026 GeoGuardMe Security Solutions.</p>
+                        <td class="footer-cell" style="background-color: ${footerBg}; padding: 30px; text-align: center; border-top: 1px solid ${borderColor}; font-size: 12px; color: #94a3b8; font-family: sans-serif;">
+                            <p style="margin: 0 0 8px 0; font-weight: 600; color: #64748b;">&copy; 2026 GeoGuardMe Security Solutions.</p>
                             <p style="margin: 0;"><a href="https://${BRAND.website}" style="color: ${BRAND.accentColor}; text-decoration: none; font-weight: 700;">${BRAND.website}</a></p>
                         </td>
                     </tr>
@@ -287,7 +309,6 @@
 
         async function copyToClipboard() {
             const html = generateEmailHtml(editorEl.innerHTML, true);
-
             try {
                 const blob = new Blob([html], { type: 'text/html' });
                 await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
