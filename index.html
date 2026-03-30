@@ -74,7 +74,7 @@
             background-color: #e0f2fe;
             color: #0369a1;
             border-color: #bae6fd;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
@@ -214,17 +214,14 @@
 
         // Visual Feedback Logic
         function updateToolbarState() {
-            // 1. Check Bold/Italic via CommandState
             document.getElementById('btn-bold').classList.toggle('active', document.queryCommandState('bold'));
             document.getElementById('btn-italic').classList.toggle('active', document.queryCommandState('italic'));
 
-            // 2. Check Block Format via standard DOM inspection (more reliable than queryCommandValue)
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 let parent = selection.getRangeAt(0).startContainer;
-                if (parent.nodeType === 3) parent = parent.parentNode; // Text node to element
+                if (parent.nodeType === 3) parent = parent.parentNode;
 
-                // Walk up until we find H2 or P or reach the editor boundary
                 let isH2 = false;
                 let isP = false;
                 let node = parent;
@@ -240,7 +237,6 @@
             }
         }
 
-        // Rich Text Formatting Function
         function format(command, value = null) {
             document.execCommand(command, false, value);
             editorEl.focus();
@@ -262,50 +258,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light">
-    <meta name="supported-color-schemes" content="light">
     <style>
-        /* Logo wrapper: white pill */
-        .logo-wrapper {
-            background-color: #ffffff !important;
-            border-radius: 20px;
-            padding: 15px;
-            display: inline-block;
-            border: 3px solid ${BRAND.accentColor};
+        /* Dark Mode Handling for modern email clients */
+        :root {
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
         }
-        /* Light logo always visible; dark logo hidden by default */
-        .logo-light { display: block !important; max-width: 240px; height: auto; margin: 0 auto; border: 0; }
-        .logo-dark  { display: none  !important; max-width: 240px; height: auto; margin: 0 auto; border: 0; }
-        ${!forPreview ? `@media (prefers-color-scheme: dark) {
-            /* Swap to dark logo and remove white box */
-            .logo-light { display: none  !important; }
-            .logo-dark  { display: block !important; }
+
+        @media (prefers-color-scheme: dark) {
             .logo-wrapper {
                 background-color: transparent !important;
                 border-color: transparent !important;
                 padding: 0 !important;
             }
-        }` : '/* preview: dark mode swap intentionally omitted */'}
+            .logo-light {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            .logo-dark {
+                display: block !important;
+                max-width: 240px !important;
+                width: 240px !important;
+                height: auto !important;
+                visibility: visible !important;
+            }
+            .content-table {
+                background-color: #1a202c !important;
+                border-color: #2d3748 !important;
+            }
+            .text-body {
+                color: #e2e8f0 !important;
+            }
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
             <td style="padding: 30px 0;" align="center">
-                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; margin: 0 auto;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="content-table" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; margin: 0 auto;">
                     <tr>
                         <td style="background-color: ${BRAND.primaryColor}; padding: 40px; text-align: center;">
-                            <div class="logo-wrapper" style="background-color: #ffffff !important; border-radius: 20px; padding: 15px; display: inline-block; border: 3px solid ${BRAND.accentColor}; mso-padding-alt: 0px;">
-                                <!-- Light mode logo (always shown in preview) -->
+                            <div class="logo-wrapper" style="background-color: #ffffff; border-radius: 20px; padding: 15px; display: inline-block; border: 3px solid ${BRAND.accentColor};">
+                                <!-- Light mode logo -->
                                 <img class="logo-light" src="${BRAND.logo}" alt="${BRAND.name} Logo" style="display: block; border: 0; max-width: 240px; height: auto; margin: 0 auto;">
-                                <!-- Dark mode logo (only included in copied email, not preview) -->
-                                ${!forPreview ? `<img class="logo-dark" src="${BRAND.logoDark}" alt="${BRAND.name} Logo" style="display: none; border: 0; max-width: 240px; height: auto; margin: 0 auto;">` : ''}
+                                
+                                <!-- Dark mode logo (Hidden by default, swapped via media query) -->
+                                <div class="logo-dark" style="display: none; mso-hide: all;">
+                                    <img src="${BRAND.logoDark}" alt="${BRAND.name} Logo" style="display: block; border: 0; max-width: 240px; height: auto; margin: 0 auto;">
+                                </div>
                             </div>
                             <p style="margin: 15px 0 0 0; color: ${BRAND.accentColor}; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-family: sans-serif;">${BRAND.tagline}</p>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding: 40px; background-color: #ffffff; font-family: sans-serif;">
+                        <td class="text-body" style="padding: 40px; background-color: #ffffff; font-family: sans-serif;">
                             ${styledContent}
                         </td>
                     </tr>
@@ -326,14 +333,14 @@
         }
 
         function updatePreview() {
-            const html = generateEmailHtml(editorEl.innerHTML, true); // force light mode in preview
+            // Previews stay in light mode for consistency within the app UI
+            const html = generateEmailHtml(editorEl.innerHTML, true);
             previewEl.srcdoc = html;
-            // Auto-resize iframe to content height after it loads
             previewEl.onload = () => {
                 try {
                     const body = previewEl.contentDocument.body;
                     previewEl.style.height = (body.scrollHeight + 20) + 'px';
-                } catch(e) {}
+                } catch (e) { }
             };
         }
 
@@ -354,6 +361,7 @@
                 }, 3000);
             } catch (err) {
                 console.error('Clipboard error:', err);
+                // Fallback for document.execCommand('copy')
                 const tempDiv = document.createElement('div');
                 tempDiv.style.position = 'fixed';
                 tempDiv.style.left = '-9999px';
@@ -370,16 +378,13 @@
             }
         }
 
-        // Listeners for UI state updates
         editorEl.addEventListener('input', () => {
             updatePreview();
             updateToolbarState();
         });
 
-        // Update button highlighting when user clicks or moves cursor
         ['keyup', 'mousedown', 'mouseup', 'click'].forEach(evt => {
             editorEl.addEventListener(evt, () => {
-                // Short timeout to ensure selection/caret position is updated in DOM
                 setTimeout(updateToolbarState, 20);
             });
         });
